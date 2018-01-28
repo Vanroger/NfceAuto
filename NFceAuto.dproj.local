@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2018/01/25 13:07:38.000.615,=D:\Sistemas\NFceAuto\FormUnit1.pas</Transaction>
+    <Transaction>2018/01/25 13:07:39.000.809,=D:\Sistemas\NFceAuto\ServerMethodsUnit1.pas</Transaction>
+    <Transaction>2018/01/25 13:07:40.000.336,=D:\Sistemas\NFceAuto\ServerContainerUnit1.pas</Transaction>
+    <Transaction>2018/01/25 13:07:41.000.781,=D:\Sistemas\NFceAuto\WebModuleUnit1.pas</Transaction>
+    <Transaction>2018/01/25 13:07:42.000.585,=D:\Sistemas\NFceAuto\js\serverfunctionexecutor.js</Transaction>
+    <Transaction>2018/01/25 13:07:42.000.701,=D:\Sistemas\NFceAuto\js\json2.js</Transaction>
+    <Transaction>2018/01/25 13:07:42.000.893,=D:\Sistemas\NFceAuto\js\callbackframework-min.js</Transaction>
+    <Transaction>2018/01/25 13:07:42.000.735,=D:\Sistemas\NFceAuto\js\serverfunctions.js</Transaction>
+    <Transaction>2018/01/25 13:07:42.000.717,=D:\Sistemas\NFceAuto\js\callbackframework.js</Transaction>
+    <Transaction>2018/01/25 13:07:42.000.491,=D:\Sistemas\NFceAuto\js\base64.js</Transaction>
+    <Transaction>2018/01/25 13:07:42.000.769,=D:\Sistemas\NFceAuto\js\base64-min.js</Transaction>
+    <Transaction>2018/01/25 13:07:42.000.860,=D:\Sistemas\NFceAuto\js\serverfunctionexecutor-min.js</Transaction>
+    <Transaction>2018/01/25 13:07:42.000.823,=D:\Sistemas\NFceAuto\js\json2-min.js</Transaction>
+    <Transaction>2018/01/25 13:37:34.000.892,=D:\Sistemas\NFceAuto\Unit2.pas</Transaction>
+    <Transaction>2018/01/25 13:46:51.000.547,D:\Sistemas\NFceAuto\uCertificado.pas=D:\Sistemas\NFceAuto\Unit2.pas</Transaction>
+    <Transaction>2018/01/25 13:46:51.000.547,D:\Sistemas\NFceAuto\uCertificado.dfm=D:\Sistemas\NFceAuto\Unit2.dfm</Transaction>
+    <Transaction>2018/01/25 13:46:58.000.490,D:\Sistemas\NFceAuto\uSC.dfm=D:\Sistemas\NFceAuto\ServerContainerUnit1.dfm</Transaction>
+    <Transaction>2018/01/25 13:46:58.000.490,D:\Sistemas\NFceAuto\uSC.pas=D:\Sistemas\NFceAuto\ServerContainerUnit1.pas</Transaction>
+    <Transaction>2018/01/25 13:47:06.000.284,D:\Sistemas\NFceAuto\uSM.dfm=D:\Sistemas\NFceAuto\ServerMethodsUnit1.dfm</Transaction>
+    <Transaction>2018/01/25 13:47:06.000.284,D:\Sistemas\NFceAuto\uSM.pas=D:\Sistemas\NFceAuto\ServerMethodsUnit1.pas</Transaction>
+    <Transaction>2018/01/25 13:47:22.000.213,D:\Sistemas\NFceAuto\uPrincipal.pas=D:\Sistemas\NFceAuto\FormUnit1.pas</Transaction>
+    <Transaction>2018/01/25 13:47:22.000.213,D:\Sistemas\NFceAuto\uPrincipal.dfm=D:\Sistemas\NFceAuto\FormUnit1.dfm</Transaction>
+    <Transaction>2018/01/25 13:47:30.000.068,D:\Sistemas\NFceAuto\uWM.pas=D:\Sistemas\NFceAuto\WebModuleUnit1.pas</Transaction>
+    <Transaction>2018/01/25 13:47:30.000.068,D:\Sistemas\NFceAuto\uWM.dfm=D:\Sistemas\NFceAuto\WebModuleUnit1.dfm</Transaction>
+    <Transaction>2018/01/26 14:19:16.000.728,=D:\Sistemas\NFceAuto\acbrcapicom\ACBrCAPICOM_TLB.pas</Transaction>
+    <Transaction>2018/01/26 14:26:14.000.037,D:\Sistemas\NFceAuto\acbrcapicom\ACBrCAPICOM_TLB.pas=</Transaction>
+    <Transaction>2018/01/27 17:38:47.000.244,D:\Desenvolvimento\sistemas\NFceAuto\ufrmCertificado.dfm=D:\Desenvolvimento\sistemas\NFceAuto\uCertificado.dfm</Transaction>
+    <Transaction>2018/01/27 17:38:47.000.244,D:\Desenvolvimento\sistemas\NFceAuto\ufrmCertificado.pas=D:\Desenvolvimento\sistemas\NFceAuto\uCertificado.pas</Transaction>
+    <Transaction>2018/01/27 17:41:48.000.384,=D:\Desenvolvimento\sistemas\NFceAuto\Unit1.pas</Transaction>
+    <Transaction>2018/01/27 17:42:46.000.121,D:\Desenvolvimento\sistemas\NFceAuto\Unit1.dfm=D:\Desenvolvimento\sistemas\NFceAuto\untGerenciadorNFCe.dfm</Transaction>
+    <Transaction>2018/01/27 17:42:46.000.121,D:\Desenvolvimento\sistemas\NFceAuto\Unit1.pas=D:\Desenvolvimento\sistemas\NFceAuto\untGerenciadorNFCe.pas</Transaction>
+    <Transaction>2018/01/27 17:48:05.000.473,=D:\Desenvolvimento\sistemas\NFceAuto\ModelSupport_NFceAuto\default.txaPackage</Transaction>
+    <Transaction>2018/01/27 17:48:11.000.660,=D:\Desenvolvimento\sistemas\NFceAuto\ModelSupport_NFceAuto\default.txvpck</Transaction>
+    <Transaction>2018/01/27 17:48:15.000.768,=D:\Desenvolvimento\sistemas\NFceAuto\ModelSupport_NFceAuto\NFceAuto\default.txvpck</Transaction>
+    <Transaction>2018/01/27 17:49:55.000.019,=D:\Desenvolvimento\sistemas\NFceAuto\Unit1.pas</Transaction>
+    <Transaction>2018/01/27 17:52:16.000.957,D:\Desenvolvimento\sistemas\NFceAuto\Unit1.pas=D:\Desenvolvimento\sistemas\NFceAuto\uCertificado.pas</Transaction>
+    <Transaction>2018/01/27 18:17:02.000.743,=D:\Desenvolvimento\sistemas\NFceAuto\untEmitente.pas</Transaction>
+    <Transaction>2018/01/27 18:27:30.000.010,D:\Desenvolvimento\sistemas\NFceAuto\untEmitente.pas=D:\Desenvolvimento\sistemas\NFceAuto\uEmitente.pas</Transaction>
+    <Transaction>2018/01/27 18:37:06.000.579,=D:\Desenvolvimento\sistemas\NFceAuto\Unit1.pas</Transaction>
+    <Transaction>2018/01/27 18:38:10.000.582,D:\Desenvolvimento\sistemas\NFceAuto\Unit1.dfm=D:\Desenvolvimento\sistemas\NFceAuto\untEmitente.dfm</Transaction>
+    <Transaction>2018/01/27 18:38:10.000.582,D:\Desenvolvimento\sistemas\NFceAuto\Unit1.pas=D:\Desenvolvimento\sistemas\NFceAuto\untEmitente.pas</Transaction>
+    <Transaction>2018/01/27 22:15:07.000.807,D:\Desenvolvimento\sistemas\NFceAuto\ufrmEmitente.dfm=D:\Desenvolvimento\sistemas\NFceAuto\untEmitente.dfm</Transaction>
+    <Transaction>2018/01/27 22:15:07.000.807,D:\Desenvolvimento\sistemas\NFceAuto\ufrmEmitente.pas=D:\Desenvolvimento\sistemas\NFceAuto\untEmitente.pas</Transaction>
+    <Transaction>2018/01/28 01:11:22.000.382,=D:\Desenvolvimento\sistemas\NFceAuto\untIdentificacao.pas</Transaction>
+  </Transactions>
+</BorlandProject>
