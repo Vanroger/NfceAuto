@@ -14,7 +14,8 @@ uses
   uCertificado in 'uCertificado.pas',
   uEmitente in 'uEmitente.pas',
   ufrmEmitente in 'ufrmEmitente.pas' {frmEmitente},
-  untIdentificacao in 'untIdentificacao.pas';
+  untIdentificacao in 'untIdentificacao.pas',
+  uItem in 'uItem.pas';
 
 {$R *.res}
 

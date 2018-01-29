@@ -39,6 +39,14 @@ object frmPrincipal: TfrmPrincipal
     Caption = 'Emitente'
     OnClick = btnEmitenteClick
   end
+  object SpeedButton2: TSpeedButton
+    Left = 272
+    Top = 112
+    Width = 95
+    Height = 22
+    Caption = 'teste class item'
+    OnClick = SpeedButton2Click
+  end
   object ButtonStart: TButton
     Left = 24
     Top = 8

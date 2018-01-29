@@ -5,7 +5,8 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, ACBrBase, ACBrDFe, ACBrNFe, uCertificado,
-  Data.DB, Datasnap.DBClient, uEmitente;
+  Data.DB, Datasnap.DBClient, uEmitente, rest.json, System.JSON, uitem,
+  system.generics.collections;
 
 type
   TfrmGerenciadorNFCe = class(TForm)
@@ -35,11 +36,16 @@ type
   private
     fCertificado : TCertificado;
     fEmitente    : TEmitente;
+    fItem        : Titem;
+    fItens       : TObjectList<Titem>;
+//    fItens       : TList;
     procedure LeCertificado;
     procedure LeEmitente;
+    function InformarItens(value: TJSONObject): boolean;
     { Private declarations }
   public
     { Public declarations }
+    function EnviarNFCe(value : TJSONObject): TJsonObject;
   end;
 
 var
@@ -49,8 +55,57 @@ implementation
 
 {$R *.dfm}
 
+function TfrmGerenciadorNFCe.EnviarNFCe(value: TJSONObject): TJsonObject;
+begin
+  try
+    InformarItens(value);
+  finally
+
+  end;
+end;
+
+function TfrmGerenciadorNFCe.InformarItens(value: TJSONObject): boolean;
+var
+  i: integer;
+  valRoot : TJSONValue;
+  objRoot : TJSONObject;
+  valItens : TJSONValue;
+  arrItens : TJsonArray;
+begin
+  try
+    if fitens.Count > 0 then
+      for I := 0 to fitens.Count do
+        fitens.Delete(i);
+
+    valRoot := TJSONObject.ParseJSONValue(value.ToString);
+    if valRoot <> nil  then begin
+      objRoot := TJSONObject(valRoot);
+      if objRoot.Count > 0 then begin
+        valItens := objRoot.Values['items'];
+        if valItens <> nil then begin
+          if valItens is TJSONArray then begin
+            arrItens := TJSONArray(valItens);
+            fItens := TObjectList<Titem>.Create;
+            for I := 0 to arrItens.Count -1 do begin
+              if arrItens.Items[i] is TJSONObject then begin
+                fItens.Add(fItem.Create);
+                fItem := TJson.JsonToObject<TItem>(arrItens.items[i].tostring);
+//                fitens.Add(fItem);
+              end;
+            end;
+          end;
+        end;
+      end;
+    end;
+  except
+
+  end;
+
+end;
+
 procedure TfrmGerenciadorNFCe.FormCreate(Sender: TObject);
 begin
+  fitens := TList.Create;
   fCertificado := TCertificado.Create;
   LeCertificado;
   fEmitente := TEmitente.Create;
