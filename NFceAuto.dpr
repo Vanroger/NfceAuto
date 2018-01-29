@@ -17,7 +17,8 @@ uses
   untIdentificacao in 'untIdentificacao.pas',
   uItem in 'uItem.pas',
   uDestinatario in 'uDestinatario.pas',
-  uArquivoJson in 'uArquivoJson.pas';
+  uArquivoJson in 'uArquivoJson.pas',
+  uWebServices in 'uWebServices.pas';
 
 {$R *.res}
 

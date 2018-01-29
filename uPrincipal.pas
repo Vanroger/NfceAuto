@@ -20,6 +20,11 @@ type
     SpeedButton1: TSpeedButton;
     btnEmitente: TSpeedButton;
     SpeedButton2: TSpeedButton;
+    Label2: TLabel;
+    Edit1: TEdit;
+    Label3: TLabel;
+    Edit2: TEdit;
+    GroupBox1: TGroupBox;
     procedure FormCreate(Sender: TObject);
     procedure ApplicationEvents1Idle(Sender: TObject; var Done: Boolean);
     procedure ButtonStartClick(Sender: TObject);

@@ -6,7 +6,8 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, ACBrBase, ACBrDFe, ACBrNFe, uCertificado,
   Data.DB, Datasnap.DBClient, uEmitente, rest.json, System.JSON, uitem,
-  system.generics.collections, uDestinatario;
+  system.generics.collections, uDestinatario, pcnconversao, acbrutil,
+  pcnConversaoNFe, uWebServices;
 
 type
   TfrmGerenciadorNFCe = class(TForm)
@@ -35,17 +36,25 @@ type
     procedure FormCreate(Sender: TObject);
   private
     fCertificado : TCertificado;
+    fWebServices : TWebServices;
     fEmitente    : TEmitente;
     fItem        : Titem;
     fItens        : TList;
     fDestinatario : TDestinatario;
+
     procedure LeCertificado;
     procedure LeEmitente;
     function InformarItens(value: TJSONObject): boolean;
-    procedure PreencheNota;
+    procedure CriaNFCe;
+    function CriarNFe: Boolean;
+    function EnviaNFCe : Boolean;
+    function SetCertificado: Boolean;
+    procedure LeWebServices;
+
     { Private declarations }
   public
     { Public declarations }
+    OK : Boolean;
     function EnviarNFCe(value : TJSONObject): TJsonObject;
   end;
 
@@ -56,11 +65,108 @@ implementation
 
 {$R *.dfm}
 
+function TfrmGerenciadorNFCe.EnviaNFCe: Boolean;
+var
+  Sincrono : boolean;
+  i        : integer;
+begin
+  try
+    Result := TRUE;
+    ACBrNFe1.Configuracoes.Geral.VersaoDF := ve310;
+//    ACBrNFe1.Configuracoes.Geral.VersaoDF := ve400;
+
+    // sincrono - já tem a resposta no retorno se foi ou não autorizada
+    //assincrono - tem que fazer uma consulta com o protocolo.
+    Sincrono := true;// False;
+
+//    ret.status.add('ERRO');
+//    raise exception.create('Teste de erro');
+
+    ACBrNFe1.WebServices.Enviar.Lote := '1';
+    ACBrNFe1.WebServices.Enviar.Sincrono := Sincrono;
+    ACBrNFe1.WebServices.Enviar.Executar;
+//
+//    (ACBrNFe1.WebServices.Enviar.Msg);
+//    ('[ENVIO]');
+//    ('Versao='+ACBrNFe1.WebServices.Enviar.verAplic);
+//    ('TpAmb='+TpAmbToStr(ACBrNFe1.WebServices.Enviar.TpAmb));
+//    ('VerAplic='+ACBrNFe1.WebServices.Enviar.VerAplic);
+//    ('XMotivo='+ACBrNFe1.WebServices.Enviar.XMotivo);
+//    ('NRec='+ACBrNFe1.WebServices.Enviar.Recibo);
+//    ('CUF='+IntToStr(ACBrNFe1.WebServices.Enviar.CUF));
+//    ('DhRecbto='+DateTimeToStr( ACBrNFe1.WebServices.Enviar.dhRecbto));
+//    ('TMed='+IntToStr( ACBrNFe1.WebServices.Enviar.tMed));
+//    ('Recibo='+ACBrNFe1.WebServices.Enviar.Recibo);
+//    ('CStat='+IntToStr(ACBrNFe1.WebServices.Enviar.CStat));
+//
+//    if sincrono then begin
+//      ('[RETORNO]');
+//      ('TpAmb='+TpAmbToStr(ACBrNFe1.WebServices.Enviar.TpAmb));
+//      ('VerAplic='+ACBrNFe1.WebServices.Enviar.verAplic);
+//      ('CHNFE='+ acbrnfe1.NotasFiscais.Items[0].NFe.procNFe.chNFe);
+//      ('DhRecbto='+DateTimeToStr(acbrnfe1.NotasFiscais.Items[0].NFe.procNFe.dhRecbto));
+//      ('NPROT='+acbrnfe1.NotasFiscais.Items[0].NFe.procNFe.nProt);
+//      ('DigVal='+acbrnfe1.NotasFiscais.Items[0].NFe.procNFe.digVal);
+//      ('CStat='+IntToStr(ACBrNFe1.WebServices.Enviar.cstat));
+//      ('XMotivo='+ACBrNFe1.WebServices.Enviar.xmotivo);
+//      ('Versao='+ACBrNFe1.WebServices.Enviar.versao);
+//      ('CUF='+IntToStr(ACBrNFe1.WebServices.Enviar.CUF));
+//      ('NREC='+ACBrNFe1.WebServices.Enviar.Recibo);
+//    end
+//    else begin
+//      if (ACBrNFe1.WebServices.Enviar.Recibo <> '') then begin
+//        ACBrNFe1.WebServices.Retorno.Recibo := ACBrNFe1.WebServices.Enviar.Recibo;
+//        ACBrNFe1.WebServices.Retorno.Executar;
+//
+//        ('[RETORNO]');
+//        ('Versao='+ACBrNFe1.WebServices.Retorno.verAplic);
+//        ('TpAmb='+TpAmbToStr(ACBrNFe1.WebServices.Retorno.TpAmb));
+//        ('VerAplic='+ACBrNFe1.WebServices.Retorno.VerAplic);
+//        ('NRec='+ACBrNFe1.WebServices.Retorno.NFeRetorno.nRec);
+//        ('CStat='+IntToStr(ACBrNFe1.WebServices.Retorno.CStat));
+//        ('XMotivo='+ACBrNFe1.WebServices.Retorno.XMotivo);
+//        ('CUF='+IntToStr(ACBrNFe1.WebServices.Retorno.CUF));
+//        ('cMsg='+ IntToStr(ACBrNFe1.WebServices.Retorno.cMsg));
+//        ('xMsg='+ ACBrNFe1.WebServices.Retorno.xMsg);
+//        ('Recibo='+ ACBrNFe1.WebServices.Retorno.Recibo);
+//        ('NPROT='+ ACBrNFe1.WebServices.Retorno.Protocolo);
+//
+//        if Length(trim(ACBrNFe1.WebServices.Retorno.ChaveNFe)) = 44 then
+//          ('CHNFE='+ ACBrNFe1.WebServices.Retorno.ChaveNFe);
+//
+//        for I:= 0 to ACBrNFe1.WebServices.Recibo.NFeRetorno.ProtNFe.Count-1 do begin
+//          ('[NFE'+Trim(IntToStr(StrToInt(copy(ACBrNFe1.WebServices.Recibo.NFeRetorno.ProtNFe.Items[i].chNFe,26,9))))+']');
+//          ('Versao='+ACBrNFe1.WebServices.Recibo.NFeRetorno.ProtNFe.Items[i].verAplic);
+//          ('TpAmb='+TpAmbToStr(ACBrNFe1.WebServices.Recibo.NFeRetorno.ProtNFe.Items[i].tpAmb));
+//          ('VerAplic='+ACBrNFe1.WebServices.Recibo.NFeRetorno.ProtNFe.Items[i].verAplic);
+//          ('CStat='+IntToStr(ACBrNFe1.WebServices.Recibo.NFeRetorno.ProtNFe.Items[i].cStat));
+//          ('XMotivo='+ACBrNFe1.WebServices.Recibo.NFeRetorno.ProtNFe.Items[i].xMotivo);
+//          ('CUF='+IntToStr(ACBrNFe1.WebServices.Recibo.NFeRetorno.cUF));
+//          ('ChNFe='+ACBrNFe1.WebServices.Recibo.NFeRetorno.ProtNFe.Items[i].chNFe);
+//          ('DhRecbto='+DateTimeToStr(ACBrNFe1.WebServices.Recibo.NFeRetorno.ProtNFe.Items[i].dhRecbto));
+//          ('NProt='+ACBrNFe1.WebServices.Recibo.NFeRetorno.ProtNFe.Items[i].nProt);
+//          ('DigVal='+ACBrNFe1.WebServices.Recibo.NFeRetorno.ProtNFe.Items[i].digVal);
+//        end;
+
+//      end;
+//    end;
+    ACBrNFe1.NotasFiscais.Clear;
+  except
+    on e: exception do begin
+      result := false;
+   //   (e.message);
+      ACBrNFe1.NotasFiscais.Clear;
+    end;
+  end;
+end;
+
 function TfrmGerenciadorNFCe.EnviarNFCe(value: TJSONObject): TJsonObject;
 begin
   try
     fDestinatario.limpaCampos;
     InformarItens(value);
+    CriarNFe;
+    EnviaNFCe;
   finally
 
   end;
@@ -119,6 +225,9 @@ begin
   fEmitente := TEmitente.Create;
   LeEmitente;
   fDestinatario := TDestinatario.create;
+  fWebServices  := TWebServices.Create;
+  LeWebServices;
+  SetCertificado;
 
 end;
 
@@ -171,9 +280,69 @@ begin
   end;
 end;
 
-procedure TfrmGerenciadorNFCe.PreencheNota;
+function TfrmGerenciadorNFCe.CriarNFe: Boolean;
+var
+//  Salvar  : boolean;
+  ArqNFe  : String;
+  Alertas : String;
+  SL      : TStringList;
+  PATH    : String;
 begin
   try
+    ACBrNFe1.NotasFiscais.Clear;
+    ACBrNFe1.Configuracoes.Geral.ModeloDF := moNFCe;
+    ACBrNFe1.Configuracoes.Geral.VersaoDF := ve310;
+//    ACBrNFe1.Configuracoes.Geral.VersaoDF := ve400;
+    ACBrNFe1.Configuracoes.Geral.IncluirQRCodeXMLNFCe := true;
+
+    CriaNFCe;
+
+    PATH := ExtractFilePath(Application.ExeName) + ('XML\NFCE');
+
+    if not DirectoryExists(PATH) then
+      ForceDirectories(PATH);
+
+    ACBrNFe1.Configuracoes.Arquivos.PathSalvar := path;
+
+    // para gravar o retorno do nfe a autorização essa opção abaixo tem que ficar false
+    // e a opção ACBrNFe1.Configuracoes.arquivos.salvar = true
+    // o xml sempre será salvo na pasta informada acima.
+    ACBrNFe1.Configuracoes.Geral.Salvar := false;
+
+    ACBrNFe1.NotasFiscais.GerarNFe;
+    Alertas := ACBrNFe1.NotasFiscais.Items[0].Alertas;
+    ACBrNFe1.NotasFiscais.Assinar;
+    ArqNFe := PathWithDelim(ACBrNFe1.Configuracoes.Arquivos.PathSalvar)+StringReplace(ACBrNFe1.NotasFiscais.Items[0].NFe.infNFe.ID, 'NFe', '', [rfIgnoreCase])+'-nfe.xml';
+    ACBrNFe1.NotasFiscais.GravarXML(ArqNFe);
+    ACBrNFe1.NotasFiscais.Validar;
+    if not FileExists(ArqNFe) then
+      raise Exception.Create('Não foi possível criar o arquivo '+ArqNFe);
+
+//    SL := TStringList.Create;
+//
+//    try
+//      SL.LoadFromFile(ArqNFe);
+//      ret.status.add(SL.Text);
+//    finally
+//      SL.Free;
+//      Result := true;
+//    end;
+  except
+    on e: exception do begin
+      result := false;
+      ShowMessage(e.message);
+    end;
+  end;
+end;
+
+
+procedure TfrmGerenciadorNFCe.CriaNFCe;
+var
+  i : integer;
+  vTotal : Double;
+begin
+  try
+    vTotal := 0;
     ACBrNFe1.NotasFiscais.Clear;
     with ACBrNFe1.NotasFiscais.Add.NFe do begin
 //      versao        :=                   INIRec.ReadString('infNFe','versao', VersaoDFToStr(ACBrNFe1.Configuracoes.Geral.VersaoDF));
@@ -236,7 +405,7 @@ begin
       Emit.IEST              := fEmitente.IEST;
       Emit.IM                := fEmitente.IM;
       Emit.CNAE              := fEmitente.CNAE;
-      Emit.CRT               := fEmitente.CRT;
+      Emit.CRT               := StrToCRT(ok,fEmitente.CRT);
       Emit.EnderEmit.xLgr    := fEmitente.xLgr;
       Emit.EnderEmit.nro     := fEmitente.nro;
       Emit.EnderEmit.xCpl    := fEmitente.xCpl;
@@ -245,7 +414,7 @@ begin
       Emit.EnderEmit.xMun    := fEmitente.xMun;
       Emit.EnderEmit.UF      := fEmitente.UF;
       Emit.EnderEmit.CEP     := fEmitente.cep;
-      Emit.EnderEmit.cPais   := '1058';   // fEmitente.cPais;
+      Emit.EnderEmit.cPais   := 1058;   // fEmitente.cPais;
       Emit.EnderEmit.xPais   := 'BRASIL'; // fEmitente.xPais;
       Emit.EnderEmit.fone    := fEmitente.fone;
 
@@ -267,54 +436,77 @@ begin
 //         Avulsa.dPag    := StringToDateTime(INIRec.ReadString(  'Avulsa','dPag','0'));
 //       end;
 //
-//      Dest.idEstrangeiro     := INIRec.ReadString(  'Destinatario','idEstrangeiro','');
-//      Dest.CNPJCPF           := INIRec.ReadString(  'Destinatario','CNPJ'       ,INIRec.ReadString(  'Destinatario','CNPJCPF',INIRec.ReadString(  'Destinatario','CPF','')));
-//      Dest.xNome             := INIRec.ReadString(  'Destinatario','NomeRazao'  ,INIRec.ReadString(  'Destinatario','xNome'  ,''));
-//      Dest.indIEDest         := StrToindIEDest(OK,INIRec.ReadString( 'Destinatario','indIEDest','1'));
-//      Dest.IE                := INIRec.ReadString(  'Destinatario','IE'         ,'');
-//      Dest.ISUF              := INIRec.ReadString(  'Destinatario','ISUF'       ,'');
-//      Dest.Email             := INIRec.ReadString(  'Destinatario','Email'      ,'');  //NFe2
-//
-//      Dest.EnderDest.xLgr    := INIRec.ReadString(  'Destinatario','Logradouro' ,INIRec.ReadString(  'Destinatario','xLgr' ,''));
-//      if (INIRec.ReadString('Destinatario','Numero','') <> '') or (INIRec.ReadString('Destinatario','nro','') <> '') then
-//         Dest.EnderDest.nro     := INIRec.ReadString(  'Destinatario','Numero'     ,INIRec.ReadString('Destinatario','nro',''));
-//      if (INIRec.ReadString('Destinatario','Complemento','') <> '') or (INIRec.ReadString('Destinatario','xCpl','') <> '') then
-//         Dest.EnderDest.xCpl    := INIRec.ReadString(  'Destinatario','Complemento',INIRec.ReadString('Destinatario','xCpl',''));
-//      Dest.EnderDest.xBairro := INIRec.ReadString(  'Destinatario','Bairro'     ,INIRec.ReadString(  'Destinatario','xBairro',''));
-//      Dest.EnderDest.cMun    := INIRec.ReadInteger( 'Destinatario','CidadeCod'  ,INIRec.ReadInteger( 'Destinatario','cMun'   ,0));
-//      Dest.EnderDest.xMun    := INIRec.ReadString(  'Destinatario','Cidade'     ,INIRec.ReadString(  'Destinatario','xMun'   ,''));
-//      Dest.EnderDest.UF      := INIRec.ReadString(  'Destinatario','UF'         ,'');
-//      Dest.EnderDest.CEP     := INIRec.ReadInteger( 'Destinatario','CEP'       ,0);
-////      if Dest.EnderDest.cMun <= 0 then
-////         Dest.EnderDest.cMun := ObterCodigoMunicipio(Dest.EnderDest.xMun,Dest.EnderDest.UF);
-//      Dest.EnderDest.cPais   := INIRec.ReadInteger( 'Destinatario','PaisCod'    ,INIRec.ReadInteger('Destinatario','cPais',1058));
-//      Dest.EnderDest.xPais   := INIRec.ReadString(  'Destinatario','Pais'       ,INIRec.ReadString( 'Destinatario','xPais','BRASIL'));
-//      Dest.EnderDest.Fone    := INIRec.ReadString(  'Destinatario','Fone'       ,'');
-//
-//      I := 1 ;
-//
-//      while true do begin
-//         sSecao    := 'Produto'+IntToStrZero(I,3) ;
-//         sCodPro   := INIRec.ReadString(sSecao,'Codigo',INIRec.ReadString( sSecao,'cProd','FIM')) ;
-//         if sCodPro = 'FIM' then
-//            break ;
-//
-//         with Det.Add do begin
-//            Prod.nItem := I;
-//            infAdProd      := INIRec.ReadString(sSecao,'infAdProd','');
-//
-//            Prod.cProd    := INIRec.ReadString( sSecao,'Codigo'   ,INIRec.ReadString( sSecao,'cProd'   ,''));
-//            if (Length(INIRec.ReadString( sSecao,'EAN','')) > 0) or (Length(INIRec.ReadString( sSecao,'cEAN','')) > 0)  then
-//               Prod.cEAN      := INIRec.ReadString( sSecao,'EAN'      ,INIRec.ReadString( sSecao,'cEAN'      ,''));
-//            Prod.xProd    := INIRec.ReadString( sSecao,'Descricao',INIRec.ReadString( sSecao,'xProd',''));
-//            Prod.NCM      := INIRec.ReadString( sSecao,'NCM'      ,'');
-//            Prod.CEST     := INIRec.ReadString( sSecao,'CEST'      ,'');
-//            Prod.EXTIPI   := INIRec.ReadString( sSecao,'EXTIPI'      ,'');
-//            Prod.CFOP     := INIRec.ReadString( sSecao,'CFOP'     ,'');
-//            Prod.uCom     := INIRec.ReadString( sSecao,'Unidade'  ,INIRec.ReadString( sSecao,'uCom'  ,''));
-//            Prod.qCom     := StringToFloatDef( INIRec.ReadString(sSecao,'Quantidade'   ,INIRec.ReadString(sSecao,'qCom'  ,'')) ,0) ;
-//            Prod.vUnCom   := StringToFloatDef( INIRec.ReadString(sSecao,'ValorUnitario',INIRec.ReadString(sSecao,'vUnCom','')) ,0) ;
-//            Prod.vProd    := StringToFloatDef( INIRec.ReadString(sSecao,'ValorTotal'   ,INIRec.ReadString(sSecao,'vProd' ,'')) ,0) ;
+      Dest.idEstrangeiro     := '';
+      Dest.CNPJCPF           := fDestinatario.CNPJ;
+      Dest.xNome             := fDestinatario.XNOME;
+//      Dest.indIEDest         := ;
+      Dest.IE                := '';
+      Dest.ISUF              := '';
+      Dest.Email             := '';
+      Dest.EnderDest.xLgr    := fDestinatario.XLGR;
+      Dest.EnderDest.nro     := fDestinatario.NRO;
+      Dest.EnderDest.xCpl    := fDestinatario.xCpl;
+      Dest.EnderDest.xBairro := fDestinatario.BAIRRO;
+      Dest.EnderDest.cMun    := strtoint(fDestinatario.CMUN);
+      Dest.EnderDest.xMun    := fDestinatario.XMUN;
+      Dest.EnderDest.UF      := fDestinatario.UF;
+      Dest.EnderDest.CEP     := strtoint(fDestinatario.CEP);
+      Dest.EnderDest.cPais   := 1058;
+      Dest.EnderDest.xPais   := 'BRASIL';
+      Dest.EnderDest.Fone    := '';
+
+
+      for I := 0 to fItens.Count -1 do begin
+         with Det.Add do begin
+           Prod.nItem    := I;
+           Prod.cProd    := Titem(fitens[i]).Codigo;
+           Prod.cEAN     := Titem(fitens[i]).cEAN;
+           Prod.xProd    := Titem(fitens[i]).Nome;
+           Prod.NCM      := Titem(fitens[i]).NCM;
+           Prod.CEST     := Titem(fitens[i]).CEST;
+           Prod.CFOP     := Titem(fitens[i]).cfop;
+           Prod.uCom     := Titem(fitens[i]).unidade;
+           Prod.qCom     := Titem(fitens[i]).Quantidade;
+           Prod.vUnCom   := Titem(fitens[i]).Unitario;
+           Prod.vProd    := Titem(fitens[i]).Total;
+
+           vTotal := vTotal + Titem(fitens[i]).Total;
+
+           with Imposto do begin
+               with ICMS do begin
+                 ICMS.orig       := StrToOrig(OK, Titem(fitens[i]).Origem);
+                 CST             := StrToCSTICMS(OK, Titem(fitens[i]).CST);
+                 CSOSN           := StrToCSOSNIcms(OK, Titem(fitens[i]).CSOSN);     //NFe2
+//                 ICMS.modBC      := StrTomodBC(    OK, INIRec.ReadString(sSecao,'Modalidade',INIRec.ReadString(sSecao,'modBC','0' ) ));
+//                 ICMS.pRedBC     := StringToFloatDef( INIRec.ReadString(sSecao,'PercentualReducao',INIRec.ReadString(sSecao,'pRedBC','')) ,0);
+                 ICMS.vBC        := Titem(fitens[i]).vBC;// StringToFloatDef( Titem(fitens[i]). INIRec.ReadString(sSecao,'ValorBase',INIRec.ReadString(sSecao,'vBC'  ,'')) ,0);
+                 ICMS.pICMS      := Titem(fitens[i]).pICMS;// StringToFloatDef( INIRec.ReadString(sSecao,'Aliquota' ,INIRec.ReadString(sSecao,'pICMS','')) ,0);
+                 ICMS.vICMS      := Titem(fitens[i]).vICMS;// StringToFloatDef( INIRec.ReadString(sSecao,'Valor'    ,INIRec.ReadString(sSecao,'vICMS','')) ,0);
+//                 ICMS.modBCST    := StrTomodBCST(OK, INIRec.ReadString(sSecao,'ModalidadeST',INIRec.ReadString(sSecao,'modBCST','0')));
+//                 ICMS.pMVAST     := StringToFloatDef( INIRec.ReadString(sSecao,'PercentualMargemST' ,INIRec.ReadString(sSecao,'pMVAST' ,'')) ,0);
+//                 ICMS.pRedBCST   := StringToFloatDef( INIRec.ReadString(sSecao,'PercentualReducaoST',INIRec.ReadString(sSecao,'pRedBCST','')) ,0);
+//                 ICMS.vBCST      := StringToFloatDef( INIRec.ReadString(sSecao,'ValorBaseST',INIRec.ReadString(sSecao,'vBCST','')) ,0);
+//                 ICMS.pICMSST    := StringToFloatDef( INIRec.ReadString(sSecao,'AliquotaST' ,INIRec.ReadString(sSecao,'pICMSST' ,'')) ,0);
+//                 ICMS.vICMSST    := StringToFloatDef( INIRec.ReadString(sSecao,'ValorST'    ,INIRec.ReadString(sSecao,'vICMSST'    ,'')) ,0);
+////                 ICMS.UFST       := INIRec.ReadString(sSecao,'UFST'    ,'');                           //NFe2
+//                 ICMS.pBCOp      := StringToFloatDef( INIRec.ReadString(sSecao,'pBCOp'    ,'') ,0);    //NFe2
+//                 ICMS.vBCSTRet   := StringToFloatDef( INIRec.ReadString(sSecao,'vBCSTRet','') ,0);     //NFe2
+//                 ICMS.vICMSSTRet := StringToFloatDef( INIRec.ReadString(sSecao,'vICMSSTRet','') ,0);   //NFe2
+//                 ICMS.motDesICMS := StrTomotDesICMS(OK, INIRec.ReadString(sSecao,'motDesICMS','0'));   //NFe2
+//                 ICMS.pCredSN    := StringToFloatDef( INIRec.ReadString(sSecao,'pCredSN','') ,0);      //NFe2
+//                 ICMS.vCredICMSSN:= StringToFloatDef( INIRec.ReadString(sSecao,'vCredICMSSN','') ,0);  //NFe2
+//                 ICMS.vBCSTDest  := StringToFloatDef( INIRec.ReadString(sSecao,'vBCSTDest','') ,0);    //NFe2
+//                 ICMS.vICMSSTDest:= StringToFloatDef( INIRec.ReadString(sSecao,'vICMSSTDest','') ,0);   //NFe2
+//                 ICMS.vICMSDeson := StringToFloatDef( INIRec.ReadString(sSecao,'vICMSDeson','') ,0);
+//                 ICMS.vICMSOp    := StringToFloatDef( INIRec.ReadString(sSecao,'vICMSOp','') ,0);
+//                 ICMS.pDif       := StringToFloatDef( INIRec.ReadString(sSecao,'pDif','') ,0);
+//                 ICMS.vICMSDif   := StringToFloatDef( INIRec.ReadString(sSecao,'vICMSDif','') ,0);
+               end;
+           end;
+         end;
+      end;
+
+
 //
 //            if Length(INIRec.ReadString( sSecao,'cEANTrib','')) > 0 then
 //               Prod.cEANTrib      := INIRec.ReadString( sSecao,'cEANTrib'      ,'');
@@ -672,7 +864,7 @@ begin
 //      Total.ICMSTot.vFCPUFDest :=  StringToFloatDef( INIRec.ReadString('Total','vFCPUFDest',''),0) ;
 //      Total.ICMSTot.vBCST   := StringToFloatDef( INIRec.ReadString('Total','BaseICMSSubstituicao' ,INIRec.ReadString('Total','vBCST','')) ,0) ;
 //      Total.ICMSTot.vST     := StringToFloatDef( INIRec.ReadString('Total','ValorICMSSubstituicao',INIRec.ReadString('Total','vST'  ,'')) ,0) ;
-//      Total.ICMSTot.vProd   := StringToFloatDef( INIRec.ReadString('Total','ValorProduto' ,INIRec.ReadString('Total','vProd'  ,'')) ,0) ;
+      Total.ICMSTot.vProd   := vTotal;
 //      Total.ICMSTot.vFrete  := StringToFloatDef( INIRec.ReadString('Total','ValorFrete'   ,INIRec.ReadString('Total','vFrete' ,'')) ,0) ;
 //      Total.ICMSTot.vSeg    := StringToFloatDef( INIRec.ReadString('Total','ValorSeguro'  ,INIRec.ReadString('Total','vSeg'   ,'')) ,0) ;
 //      Total.ICMSTot.vDesc   := StringToFloatDef( INIRec.ReadString('Total','ValorDesconto',INIRec.ReadString('Total','vDesc'  ,'')) ,0) ;
@@ -681,7 +873,7 @@ begin
 //      Total.ICMSTot.vPIS    := StringToFloatDef( INIRec.ReadString('Total','ValorPIS'     ,INIRec.ReadString('Total','vPIS'   ,'')) ,0) ;
 //      Total.ICMSTot.vCOFINS := StringToFloatDef( INIRec.ReadString('Total','ValorCOFINS'  ,INIRec.ReadString('Total','vCOFINS','')) ,0) ;
 //      Total.ICMSTot.vOutro  := StringToFloatDef( INIRec.ReadString('Total','ValorOutrasDespesas',INIRec.ReadString('Total','vOutro','')) ,0) ;
-//      Total.ICMSTot.vNF     := StringToFloatDef( INIRec.ReadString('Total','ValorNota'    ,INIRec.ReadString('Total','vNF'    ,'')) ,0) ;
+      Total.ICMSTot.vNF     := vTotal;
 //      Total.ICMSTot.vTotTrib:= StringToFloatDef( INIRec.ReadString('Total','vTotTrib'     ,''),0) ;
 //
 //      Total.ISSQNtot.vServ  := StringToFloatDef( INIRec.ReadString('Total','ValorServicos',INIRec.ReadString('ISSQNtot','vServ','')) ,0) ;
@@ -826,5 +1018,37 @@ begin
   end;
 
 end;
+
+procedure TfrmGerenciadorNFCe.LeWebServices;
+begin
+  fWebServices.pAmbiente := taHomologacao;
+  fWebServices.UF := 'GO';
+  fWebServices.AguardarConsultaRet := 5000;
+  fwebServices.IntervaloTentativas := 2000;
+end;
+
+
+function TfrmGerenciadorNFCe.SetCertificado: Boolean;
+begin
+  try
+    ACBrNFe1.Configuracoes.Certificados.NumeroSerie := fcertificado.certificado;
+    ACBrNFe1.Configuracoes.Geral.CSC := fcertificado.CSC;
+    ACBrNFe1.Configuracoes.Geral.IdCSC := fcertificado.IdCsc;
+//    ACBrNFe1.Configuracoes.Certificados.Senha := fcertificado.Senha;
+
+    ACBrNFe1.Configuracoes.WebServices.Ambiente := fWebServices.pAmbiente;
+    ACBrNFe1.Configuracoes.WebServices.UF :=  fWebServices.UF;
+    acbrnfe1.Configuracoes.WebServices.AguardarConsultaRet := fWebServices.AguardarConsultaRet;
+    acbrnfe1.Configuracoes.WebServices.IntervaloTentativas := fWebServices.IntervaloTentativas;
+    Result := true;
+  except
+    on e: Exception do begin
+      Result := False;
+      ShowMessage('Ocorreu um erro ao informar o numero do certificado!' + sLineBreak +
+                  e.Message);
+    end;
+  end;
+end;
+
 
 end.

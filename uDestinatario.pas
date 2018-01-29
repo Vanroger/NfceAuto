@@ -14,6 +14,7 @@ type
     FXMUN: STRING;
     FXLGR: STRING;
     FNRO: STRING;
+    FxCpl: String;
     procedure SetBAIRRO(const Value: STRING);
     procedure SetCEP(const Value: STRING);
     procedure SetCMUN(const Value: STRING);
@@ -23,6 +24,7 @@ type
     procedure SetXLGR(const Value: STRING);
     procedure SetXMUN(const Value: STRING);
     procedure SetXNOME(const Value: STRING);
+    procedure SetxCpl(const Value: String);
     public
     procedure LimpaCampos;
     property CNPJ   : STRING read FCNPJ   write SetCNPJ;
@@ -34,6 +36,7 @@ type
     property XMUN   : STRING read FXMUN   write SetXMUN;
     property UF     : STRING read FUF     write SetUF;
     property CEP    : STRING read FCEP    write SetCEP;
+    property xCpl   : String read FxCpl   write SetxCpl; //complemento
   end;
 
 implementation
@@ -81,6 +84,11 @@ end;
 procedure TDestinatario.SetUF(const Value: STRING);
 begin
   FUF := Value;
+end;
+
+procedure TDestinatario.SetxCpl(const Value: String);
+begin
+  FxCpl := Value;
 end;
 
 procedure TDestinatario.SetXLGR(const Value: STRING);
