@@ -7,7 +7,7 @@ uses
   System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
   Vcl.AppEvnts, Vcl.StdCtrls, IdHTTPWebBrokerBridge, Web.HTTPApp, Vcl.Buttons,
   ufrmCertificado, untGerenciadorNFCe, ufrmEmitente, uItem, rest.json,
-  system.generics.collections;
+  system.generics.collections, uDestinatario, uArquivoJson;
 
 type
   TfrmPrincipal = class(TForm)
@@ -112,41 +112,60 @@ end;
 
 procedure TfrmPrincipal.SpeedButton2Click(Sender: TObject);
 var
-  vITEM : TITEM;
   vJson : Tjsonobject;
   vStr : string;
-  cITEM : TObjectList<Titem>;
+  cITEM : Titem;
+  vDest : TDestinatario;
+  vArquivo : TArquivo;
+  vArrayItens : TArrayItens;
 begin
-  cITEM := TObjectList<Titem>.Create;
+  vDest := TDestinatario.Create;
+  vdest.CNPJ   := '80892477504';
+  vdest.XNOME  := 'ROGERIO ALVES';
+  vdest.XLGR   := 'RODOVIA GO 070';
+  VDEST.NRO    := 'SN';
+  VDEST.BAIRRO := 'FAZ SAO DOMINGOS';
+  VDEST.CMUN   := '539339';
+  VDEST.XMUN   := 'GOIANIA';
+  VDEST.UF     := 'GO';
+  VDEST.CEP    := '74477600';
 
-  cITEM.Add(titem.Create);
-  cITEM[0].Codigo     := '12';
-  cITEM[0].Nome       := 'coca cola';
-  cITEM[0].Quantidade := 3;
-  cITEM[0].Unitario   := 1.50;
-  cITEM[0].Total      := 0;
-  cITEM[0].NCM        := '795678';
-  cITEM[0].Origem     := '0';
-  cITEM[0].CST        := '60';
-  cITEM[0].CSOSN      := '100';
-  cITEM[0].Aliquota   := 17;
+  vArquivo := TArquivo.Create;
+  vArquivo.Destinatario := vDest;
 
-  cITEM.Add(titem.Create);
-  cITEM[1].Codigo     := '15';
-  cITEM[1].Nome       := 'guarana x';
-  cITEM[1].Quantidade := 4;
-  cITEM[1].Unitario   := 1.90;
-  cITEM[1].Total      := 0;
-  cITEM[1].NCM        := '793568';
-  cITEM[1].Origem     := '0';
-  cITEM[1].CST        := '60';
-  cITEM[1].CSOSN      := '500';
-  cITEM[1].Aliquota   := 12;
+  setlength(vArrayItens,2);
 
-//  vStr := '{"PRODUTOS":[{"fQuantidade":3,"fNome":"coca cola","fCST":"60","fOrigem":"0","fCSOSN":"100","fUnitario":1.5,"fCodigo":"12","fTotal":0,"fNCM":"795678","fAliquota":17},{"fQuantidade":1,"fNome":"GUARANA","fCST":"60","fOrigem":"0","fCSOSN":"100","fUnitario":1.9,"fCodigo":"17","fTotal":0,"fNCM":"795678","fAliquota":17}]}';
+  cITEM := Titem.Create;
+  cITEM.Codigo     := '12';
+  cITEM.Nome       := 'coca cola';
+  cITEM.Quantidade := 3;
+  cITEM.Unitario   := 1.50;
+  cITEM.Total      := 4.50;
+  cITEM.NCM        := '795678';
+  cITEM.Origem     := '0';
+  cITEM.CST        := '60';
+  cITEM.CSOSN      := '100';
+  cITEM.Aliquota   := 17;
 
-  vjson  := TJson.ObjectToJsonObject(cITEM);
+  vArrayItens[0] := citem;
 
+  cITEM := titem.Create;
+  cITEM.Codigo     := '15';
+  cITEM.Nome       := 'guarana x';
+  cITEM.Quantidade := 4;
+  cITEM.Unitario   := 1.90;
+  cITEM.Total      := 7.60;
+  cITEM.NCM        := '793568';
+  cITEM.Origem     := '0';
+  cITEM.CST        := '60';
+  cITEM.CSOSN      := '500';
+  cITEM.Aliquota   := 12;
+
+  vArrayItens[1] := citem;
+
+  varquivo.Itens := vArrayItens;
+
+  vJSON := TJson.ObjectToJsonObject(varquivo);
   frmGerenciadorNFCe.EnviarNFCe(vjson);
 end;
 

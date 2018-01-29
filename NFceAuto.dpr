@@ -15,7 +15,9 @@ uses
   uEmitente in 'uEmitente.pas',
   ufrmEmitente in 'ufrmEmitente.pas' {frmEmitente},
   untIdentificacao in 'untIdentificacao.pas',
-  uItem in 'uItem.pas';
+  uItem in 'uItem.pas',
+  uDestinatario in 'uDestinatario.pas',
+  uArquivoJson in 'uArquivoJson.pas';
 
 {$R *.res}
 

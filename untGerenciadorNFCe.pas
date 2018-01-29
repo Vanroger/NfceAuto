@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, ACBrBase, ACBrDFe, ACBrNFe, uCertificado,
   Data.DB, Datasnap.DBClient, uEmitente, rest.json, System.JSON, uitem,
-  system.generics.collections;
+  system.generics.collections, uDestinatario;
 
 type
   TfrmGerenciadorNFCe = class(TForm)
@@ -37,8 +37,8 @@ type
     fCertificado : TCertificado;
     fEmitente    : TEmitente;
     fItem        : Titem;
-    fItens       : TObjectList<Titem>;
-//    fItens       : TList;
+    fItens        : TList;
+    fDestinatario : TDestinatario;
     procedure LeCertificado;
     procedure LeEmitente;
     function InformarItens(value: TJSONObject): boolean;
@@ -58,6 +58,7 @@ implementation
 function TfrmGerenciadorNFCe.EnviarNFCe(value: TJSONObject): TJsonObject;
 begin
   try
+    fDestinatario.limpaCampos;
     InformarItens(value);
   finally
 
@@ -70,27 +71,33 @@ var
   valRoot : TJSONValue;
   objRoot : TJSONObject;
   valItens : TJSONValue;
+  valDestinatario : TJSONValue;
   arrItens : TJsonArray;
 begin
   try
     if fitens.Count > 0 then
-      for I := 0 to fitens.Count do
+      for I := fitens.Count-1 downto 0 do
         fitens.Delete(i);
 
     valRoot := TJSONObject.ParseJSONValue(value.ToString);
     if valRoot <> nil  then begin
       objRoot := TJSONObject(valRoot);
       if objRoot.Count > 0 then begin
-        valItens := objRoot.Values['items'];
+        valDestinatario := objRoot.Values['destinatario'];
+        if valDestinatario <> nil then begin
+          if valDestinatario is TJSONObject then begin
+            fDestinatario := TJson.JsonToObject<TDestinatario>(valDestinatario.tostring);
+          end;
+        end;
+
+        valItens := objRoot.Values['itens'];
         if valItens <> nil then begin
           if valItens is TJSONArray then begin
             arrItens := TJSONArray(valItens);
-            fItens := TObjectList<Titem>.Create;
             for I := 0 to arrItens.Count -1 do begin
               if arrItens.Items[i] is TJSONObject then begin
-                fItens.Add(fItem.Create);
                 fItem := TJson.JsonToObject<TItem>(arrItens.items[i].tostring);
-//                fitens.Add(fItem);
+                fitens.Add(fItem);
               end;
             end;
           end;
@@ -110,6 +117,7 @@ begin
   LeCertificado;
   fEmitente := TEmitente.Create;
   LeEmitente;
+  fDestinatario := TDestinatario.create;
 
 end;
 
