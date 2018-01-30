@@ -130,7 +130,7 @@ begin
   vdest.XLGR   := 'RODOVIA GO 070';
   VDEST.NRO    := 'SN';
   VDEST.BAIRRO := 'FAZ SAO DOMINGOS';
-  VDEST.CMUN   := '539339';
+  VDEST.CMUN   := '5208707';
   VDEST.XMUN   := 'GOIANIA';
   VDEST.UF     := 'GO';
   VDEST.CEP    := '74477600';
@@ -146,11 +146,18 @@ begin
   cITEM.Quantidade := 3;
   cITEM.Unitario   := 1.50;
   cITEM.Total      := 4.50;
-  cITEM.NCM        := '795678';
+  cITEM.NCM        := '22021000';
   cITEM.Origem     := '0';
-  cITEM.CST        := '60';
-  cITEM.CSOSN      := '100';
+  cITEM.CST        := '00';
+  cITEM.CSOSN      := '500';
   cITEM.Aliquota   := 17;
+  cITEM.CFOP       := '5405';
+  cITEM.unidade    := 'UND';
+  cITEM.vBC        := 4.50;
+  cITEM.pICMS      := 17;
+  cITEM.vICMS      := 0.76;
+  cItem.CEST       := '0301100';
+
 
   vArrayItens[0] := citem;
 
@@ -160,11 +167,17 @@ begin
   cITEM.Quantidade := 4;
   cITEM.Unitario   := 1.90;
   cITEM.Total      := 7.60;
-  cITEM.NCM        := '793568';
+  cITEM.NCM        := '22021000';
   cITEM.Origem     := '0';
-  cITEM.CST        := '60';
+  cITEM.CST        := '00';
   cITEM.CSOSN      := '500';
   cITEM.Aliquota   := 12;
+  cITEM.CFOP       := '5405';
+  cITEM.unidade    := 'UND';
+  cITEM.vBC        := 7.60;
+  cITEM.pICMS      := 17;
+  cITEM.vICMS      := 1.29;
+  cItem.CEST       := '0301100';
 
   vArrayItens[1] := citem;
 

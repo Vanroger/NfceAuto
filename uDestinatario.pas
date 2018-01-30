@@ -15,6 +15,7 @@ type
     FXLGR: STRING;
     FNRO: STRING;
     FxCpl: String;
+    FindIEDest: string;
     procedure SetBAIRRO(const Value: STRING);
     procedure SetCEP(const Value: STRING);
     procedure SetCMUN(const Value: STRING);
@@ -25,6 +26,7 @@ type
     procedure SetXMUN(const Value: STRING);
     procedure SetXNOME(const Value: STRING);
     procedure SetxCpl(const Value: String);
+    procedure SetindIEDest(const Value: string);
     public
     procedure LimpaCampos;
     property CNPJ   : STRING read FCNPJ   write SetCNPJ;
@@ -37,6 +39,7 @@ type
     property UF     : STRING read FUF     write SetUF;
     property CEP    : STRING read FCEP    write SetCEP;
     property xCpl   : String read FxCpl   write SetxCpl; //complemento
+    property indIEDest : string read FindIEDest write SetindIEDest;
   end;
 
 implementation
@@ -74,6 +77,11 @@ end;
 procedure TDestinatario.SetCNPJ(const Value: STRING);
 begin
   FCNPJ := Value;
+end;
+
+procedure TDestinatario.SetindIEDest(const Value: string);
+begin
+  FindIEDest := Value;
 end;
 
 procedure TDestinatario.SetNRO(const Value: STRING);

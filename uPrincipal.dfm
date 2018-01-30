@@ -69,7 +69,7 @@ object frmPrincipal: TfrmPrincipal
     Left = 299
     Top = 24
     Width = 53
-    Height = 25
+    Height = 21
     TabOrder = 2
     Text = '211'
   end
@@ -123,7 +123,7 @@ object frmPrincipal: TfrmPrincipal
   end
   object ApplicationEvents1: TApplicationEvents
     OnIdle = ApplicationEvents1Idle
-    Left = 320
-    Top = 64
+    Left = 48
+    Top = 8
   end
 end

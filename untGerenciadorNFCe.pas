@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, ACBrBase, ACBrDFe, ACBrNFe, uCertificado,
   Data.DB, Datasnap.DBClient, uEmitente, rest.json, System.JSON, uitem,
   system.generics.collections, uDestinatario, pcnconversao, acbrutil,
-  pcnConversaoNFe, uWebServices;
+  pcnConversaoNFe, uWebServices, uIdentificacao;
 
 type
   TfrmGerenciadorNFCe = class(TForm)
@@ -41,7 +41,9 @@ type
     fItem        : Titem;
     fItens        : TList;
     fDestinatario : TDestinatario;
-
+    fIdentificacao : TIdentificacao;
+    fNumeroNf      : Integer;
+    fCodigoNumerico : Integer;
     procedure LeCertificado;
     procedure LeEmitente;
     function InformarItens(value: TJSONObject): boolean;
@@ -50,6 +52,9 @@ type
     function EnviaNFCe : Boolean;
     function SetCertificado: Boolean;
     procedure LeWebServices;
+    procedure SetIDentificacao;
+    function BuscaNumeroNF: Integer;
+    function UFparaCodigo(const UF: string): integer;
 
     { Private declarations }
   public
@@ -85,8 +90,8 @@ begin
     ACBrNFe1.WebServices.Enviar.Lote := '1';
     ACBrNFe1.WebServices.Enviar.Sincrono := Sincrono;
     ACBrNFe1.WebServices.Enviar.Executar;
-//
-//    (ACBrNFe1.WebServices.Enviar.Msg);
+
+    showmessage(ACBrNFe1.WebServices.Enviar.Msg);
 //    ('[ENVIO]');
 //    ('Versao='+ACBrNFe1.WebServices.Enviar.verAplic);
 //    ('TpAmb='+TpAmbToStr(ACBrNFe1.WebServices.Enviar.TpAmb));
@@ -165,11 +170,20 @@ begin
   try
     fDestinatario.limpaCampos;
     InformarItens(value);
+    fCodigoNumerico := Random(9999);
+    fNumeroNf       := BuscaNumeroNF;
+    fIdentificacao.cNF := fCodigoNumerico; // string CODIGO
+    fIdentificacao.nNF := fNumeroNf; // integer NUMERO DOCUMENTO FISCAL
     CriarNFe;
     EnviaNFCe;
   finally
 
   end;
+end;
+
+function TfrmGerenciadorNFCe.BuscaNumeroNF: Integer;
+begin
+  result := random(999);
 end;
 
 function TfrmGerenciadorNFCe.InformarItens(value: TJSONObject): boolean;
@@ -228,6 +242,40 @@ begin
   fWebServices  := TWebServices.Create;
   LeWebServices;
   SetCertificado;
+  fIdentificacao := TIdentificacao.create;
+  SetIDentificacao;
+
+end;
+
+procedure TfrmGerenciadorNFCe.SetIDentificacao;
+begin
+  try
+    fIdentificacao.cUF      := UFparaCodigo(fEmitente.UF);    // integer
+    fIdentificacao.cMunFG   := fEmitente.cMun;  // integer
+//    fIdentificacao.cNF      := fCodigoNumerico; // string CODIGO
+    fIdentificacao.natOp    := 'VENDA';// string
+    fIdentificacao.indPag   := '0';  // integer
+    fIdentificacao.modelo   := 65; // integer
+    fIdentificacao.serie    := 1;  // integer
+//    fIdentificacao.nNF      := fNumeroNf; // integer NUMERO DOCUMENTO FISCAL
+    fIdentificacao.dhEmi    := NOW; //FormatDateTime('DD/MM/YYYY HH:MM:SS',Now);
+    fIdentificacao.tpNF     := '1'; // integer
+    fIdentificacao.idDest   := '1'; //Identificador de local de destino da operação 1=Operação interna; 2=Operação interestadual; 3=Operação com exterior.
+    fIdentificacao.tpImp    := '4'; // integer     //Formato de Impressão do DANFE 0=Sem geração de DANFE; 1=DANFE normal, Retrato; 2=DANFE normal, Paisagem; 3=DANFE Simplificado; 4=DANFE NFC-e; 5=DANFE NFC-e em mensagem eletrônica (o envio de mensagem eletrônica pode ser feita de forma simultânea com a impressão do DANFE; usar o tpImp
+    fIdentificacao.tpEmis   := '1'; // integer     //Tipo de Emissão da NF-e 1=Emissão normal (não em contingência); 2=Contingência FS-IA, com impressão do DANFE em formulário de segurança; 3=Contingência SCAN (Sistema de Contingência do Ambiente Nacional); 4=Contingência DPEC (Declaração Prévia da Emissão em Contingência); 5=Contingên
+    fIdentificacao.tpAmb    := '2'; // integer     //Identificação do Ambiente  1=Produção/2=Homologação
+    fIdentificacao.finNFe   := '1'; // integer     //Finalidade de emissão da NF-e 1=NF-e normal; 2=NF-e complementar; 3=NF-e de ajuste; 4=Devolução de mercadoria
+    fIdentificacao.indFinal := '1'; // integer     //Indica operação com Consumidor final 0=Normal; 1=Consumidor final; 29
+    fIdentificacao.indPres  := '1'; // integer     //Indicador de presença do comprador no estabelecimento comercial no momento da operação 0=Não se aplica (por exemplo, Nota Fiscal complementar ou de ajuste); 1=Operação presencial; 2=Operação não presencial, pela Internet; 3=Operação não presencial, Teleatendimento; 4=NFC-e em operaçã
+    fIdentificacao.procEmi  := '0'; // integer     //Processo de emissão da NF-e 0=Emissão de NF-e com aplicativo do contribuinte; 1=Emissão de NF-e avulsa pelo Fisco; 2=Emissão de NF-e avulsa, pelo contribuinte com seu certificado digital, através do site do Fisco; 3=Emissão NF-e pelo contribuinte com aplicativo fornecido pelo Fisco.
+    fIdentificacao.verProc  := 'VER 1.0';        //Versão do Processo de emissão da NF-e Informar a versão do aplicativo emissor de NF-e.
+    fIdentificacao.dhCont   := 0;//NOW; // FormatDateTime('DD/MM/YYYY HH:MM:SS',Now);//Data e Hora da entrada em contingência
+    fIdentificacao.xJust    := '';//'Falha na conexao com a internet'; //Justificativa da entrada em contingência
+    fidentificacao.versao   := ve310;
+    fidentificacao.modFrete := 9;
+  except
+
+  end;
 
 end;
 
@@ -345,41 +393,36 @@ begin
     vTotal := 0;
     ACBrNFe1.NotasFiscais.Clear;
     with ACBrNFe1.NotasFiscais.Add.NFe do begin
-//      versao        :=                   INIRec.ReadString('infNFe','versao', VersaoDFToStr(ACBrNFe1.Configuracoes.Geral.VersaoDF));
-//      infNFe.versao := StringToFloatDef( INIRec.ReadString('infNFe','versao', VersaoDFToStr(ACBrNFe1.Configuracoes.Geral.VersaoDF)),0) ;
-//
-//      versao := infNFe.VersaoStr;
-//      versao := StringReplace(versao,'versao="','',[rfReplaceAll,rfIgnoreCase]);
-//      versao := StringReplace(versao,'"','',[rfReplaceAll,rfIgnoreCase]);
-//
-//      Ide.cNF        := INIRec.ReadInteger( 'Identificacao','Codigo' ,INIRec.ReadInteger( 'Identificacao','cNF' ,0));
-//      Ide.natOp      := INIRec.ReadString(  'Identificacao','NaturezaOperacao' ,INIRec.ReadString(  'Identificacao','natOp' ,''));
-//      Ide.indPag     := StrToIndpag(OK,INIRec.ReadString( 'Identificacao','FormaPag',INIRec.ReadString( 'Identificacao','indPag','0')));
-//      Ide.modelo     := INIRec.ReadInteger( 'Identificacao','Modelo' ,INIRec.ReadInteger( 'Identificacao','mod' ,55));
-//      ACBrNFe1.Configuracoes.Geral.ModeloDF := StrToModeloDF(OK,IntToStr(Ide.modelo));
-//      ACBrNFe1.Configuracoes.Geral.VersaoDF := StrToVersaoDF(OK,versao);
-//      Ide.serie      := INIRec.ReadInteger( 'Identificacao','Serie'  ,1);
-//      Ide.nNF        := INIRec.ReadInteger( 'Identificacao','Numero' ,INIRec.ReadInteger( 'Identificacao','nNF' ,0));
-//      Ide.dEmi       := StringToDateTime(INIRec.ReadString( 'Identificacao','Emissao',INIRec.ReadString( 'Identificacao','dEmi',INIRec.ReadString( 'Identificacao','dhEmi',FormatDateTimeBr(Now)))));
-//      Ide.dSaiEnt    := StringToDateTime(INIRec.ReadString( 'Identificacao','Saida'  ,INIRec.ReadString( 'Identificacao','dSaiEnt'  ,INIRec.ReadString( 'Identificacao','dhSaiEnt','0'))));
-//      Ide.hSaiEnt    := StringToDateTime(INIRec.ReadString( 'Identificacao','hSaiEnt','0'));  //NFe2
-//      Ide.tpNF       := StrToTpNF(OK,INIRec.ReadString( 'Identificacao','Tipo',INIRec.ReadString( 'Identificacao','tpNF','1')));
-//
-//      Ide.idDest     := StrToDestinoOperacao(OK,INIRec.ReadString( 'Identificacao','idDest','1'));
-//
-//      Ide.tpImp      := StrToTpImp(  OK, INIRec.ReadString( 'Identificacao','tpImp',TpImpToStr(ACBrNFe1.DANFE.TipoDANFE)));  //NFe2
-//      Ide.tpEmis     := StrToTpEmis( OK,INIRec.ReadString( 'Identificacao','tpEmis',IntToStr(ACBrNFe1.Configuracoes.Geral.FormaEmissaoCodigo)));
-////      Ide.cDV
-////      Ide.tpAmb
-//      Ide.finNFe     := StrToFinNFe( OK,INIRec.ReadString( 'Identificacao','Finalidade',INIRec.ReadString( 'Identificacao','finNFe','0')));
-//      Ide.indFinal   := StrToConsumidorFinal(OK,INIRec.ReadString( 'Identificacao','indFinal','0'));
-//      Ide.indPres    := StrToPresencaComprador(OK,INIRec.ReadString( 'Identificacao','indPres','0'));
-//
-//      Ide.procEmi    := StrToProcEmi(OK,INIRec.ReadString( 'Identificacao','procEmi','0')); //NFe2
-//      Ide.verProc    := INIRec.ReadString(  'Identificacao','verProc' ,'Kontrol Sistemas' );
-//      Ide.dhCont     := StringToDateTime(INIRec.ReadString( 'Identificacao','dhCont'  ,'0')); //NFe2
-//      Ide.xJust      := INIRec.ReadString(  'Identificacao','xJust' ,'' ); //NFe2
-//
+      Ide.cNF        := fidentificacao.cNF;
+      Ide.natOp      := fidentificacao.natOp;
+      Ide.indPag     := StrToIndpag(OK,fidentificacao.indPag);
+      Ide.modelo     := fidentificacao.modelo;
+      ACBrNFe1.Configuracoes.Geral.ModeloDF := StrToModeloDF(OK,IntToStr(Ide.modelo));
+      ACBrNFe1.Configuracoes.Geral.VersaoDF := fidentificacao.versao;
+      Ide.serie      := fidentificacao.serie;
+      Ide.nNF        := fidentificacao.nNF;
+      Ide.dEmi       := fidentificacao.dhEmi;
+//      Ide.dSaiEnt    := fidentificacao.              //StringToDateTime(INIRec.ReadString( 'Identificacao','Saida'  ,INIRec.ReadString( 'Identificacao','dSaiEnt'  ,INIRec.ReadString( 'Identificacao','dhSaiEnt','0'))));
+//      Ide.hSaiEnt    := fidentificacao.              //StringToDateTime(INIRec.ReadString( 'Identificacao','hSaiEnt','0'));  //NFe2
+      Ide.tpNF       := StrToTpNF(OK,fidentificacao.tpNF);
+      Ide.idDest     := StrToDestinoOperacao(OK,fidentificacao.idDest);
+      Ide.tpImp      := StrToTpImp(OK,fidentificacao.tpImp);   // StrToTpImp(  OK, INIRec.ReadString( 'Identificacao','tpImp',TpImpToStr(ACBrNFe1.DANFE.TipoDANFE)));  //NFe2
+      Ide.tpEmis     := StrToTpEmis(OK,fidentificacao.tpEmis); // StrToTpEmis( OK,INIRec.ReadString( 'Identificacao','tpEmis',IntToStr(ACBrNFe1.Configuracoes.Geral.FormaEmissaoCodigo)));
+//      Ide.cDV                                      //
+
+      Ide.tpAmb      := StrToTpAmb(OK,fidentificacao.tpAmb);
+      Ide.finNFe     := StrToFinNFe( OK,fidentificacao.finNFe);            // StrToFinNFe( OK,INIRec.ReadString( 'Identificacao','Finalidade',INIRec.ReadString( 'Identificacao','finNFe','0')));
+      Ide.indFinal   := StrToConsumidorFinal(OK,fidentificacao.indFinal);  // StrToConsumidorFinal(OK,INIRec.ReadString( 'Identificacao','indFinal','0'));
+      Ide.indPres    := StrToPresencaComprador(OK,fidentificacao.indPres); // StrToPresencaComprador(OK,INIRec.ReadString( 'Identificacao','indPres','0'));
+
+      Ide.procEmi    := StrToProcEmi(OK,fidentificacao.procEmi); // StrToProcEmi(OK,INIRec.ReadString( 'Identificacao','procEmi','0')); //NFe2
+      Ide.verProc    := fidentificacao.verProc;                 // INIRec.ReadString(  'Identificacao','verProc' ,'Kontrol Sistemas' );
+      Ide.dhCont     := fidentificacao.dhCont;                  // StringToDateTime(INIRec.ReadString( 'Identificacao','dhCont'  ,'0')); //NFe2
+      Ide.xJust      := fidentificacao.xJust;                   // INIRec.ReadString(  'Identificacao','xJust' ,'' ); //NFe2
+      Ide.cUF        := fidentificacao.cUF;                     // INIRec.ReadInteger( 'Identificacao','cUF'       ,UFparaCodigo(Emit.EnderEmit.UF));
+      Ide.cMunFG     := fidentificacao.cMunFG;                  // INIRec.ReadInteger( 'Identificacao','CidadeCod' ,INIRec.ReadInteger( 'Identificacao','cMunFG' ,Emit.EnderEmit.cMun));
+
+      //
 //      I := 1 ;
 //      while true do begin
 //         sSecao := 'NFRef'+IntToStrZero(I,3) ;
@@ -417,9 +460,6 @@ begin
       Emit.EnderEmit.cPais   := 1058;   // fEmitente.cPais;
       Emit.EnderEmit.xPais   := 'BRASIL'; // fEmitente.xPais;
       Emit.EnderEmit.fone    := fEmitente.fone;
-
-//      Ide.cUF       := INIRec.ReadInteger( 'Identificacao','cUF'       ,UFparaCodigo(Emit.EnderEmit.UF));
-//      Ide.cMunFG    := INIRec.ReadInteger( 'Identificacao','CidadeCod' ,INIRec.ReadInteger( 'Identificacao','cMunFG' ,Emit.EnderEmit.cMun));
 //
 //      if INIRec.ReadString(  'Avulsa','CNPJ','') <> '' then
 //       begin
@@ -436,29 +476,32 @@ begin
 //         Avulsa.dPag    := StringToDateTime(INIRec.ReadString(  'Avulsa','dPag','0'));
 //       end;
 //
-      Dest.idEstrangeiro     := '';
-      Dest.CNPJCPF           := fDestinatario.CNPJ;
-      Dest.xNome             := fDestinatario.XNOME;
-//      Dest.indIEDest         := ;
-      Dest.IE                := '';
-      Dest.ISUF              := '';
-      Dest.Email             := '';
-      Dest.EnderDest.xLgr    := fDestinatario.XLGR;
-      Dest.EnderDest.nro     := fDestinatario.NRO;
-      Dest.EnderDest.xCpl    := fDestinatario.xCpl;
-      Dest.EnderDest.xBairro := fDestinatario.BAIRRO;
-      Dest.EnderDest.cMun    := strtoint(fDestinatario.CMUN);
-      Dest.EnderDest.xMun    := fDestinatario.XMUN;
-      Dest.EnderDest.UF      := fDestinatario.UF;
-      Dest.EnderDest.CEP     := strtoint(fDestinatario.CEP);
-      Dest.EnderDest.cPais   := 1058;
-      Dest.EnderDest.xPais   := 'BRASIL';
-      Dest.EnderDest.Fone    := '';
+
+//      if trim(fDestinatario.CNPJ) <> '' then begin
+//        Dest.idEstrangeiro     := '';
+//        Dest.CNPJCPF           := fDestinatario.CNPJ;
+        Dest.xNome             := fDestinatario.XNOME;
+        Dest.indIEDest         := StrToindIEDest(ok,'9');
+//        Dest.IE                := '';
+//        Dest.ISUF              := '';
+//        Dest.Email             := '';
+//        Dest.EnderDest.xLgr    := fDestinatario.XLGR;
+//        Dest.EnderDest.nro     := fDestinatario.NRO;
+//        Dest.EnderDest.xCpl    := fDestinatario.xCpl;
+//        Dest.EnderDest.xBairro := fDestinatario.BAIRRO;
+//        Dest.EnderDest.cMun    := strtoint(fDestinatario.CMUN);
+//        Dest.EnderDest.xMun    := fDestinatario.XMUN;
+//        Dest.EnderDest.UF      := fDestinatario.UF;
+//        Dest.EnderDest.CEP     := strtoint(fDestinatario.CEP);
+//        Dest.EnderDest.cPais   := 1058;
+//        Dest.EnderDest.xPais   := 'BRASIL';
+//        Dest.EnderDest.Fone    := '';
+//      end;
 
 
       for I := 0 to fItens.Count -1 do begin
          with Det.Add do begin
-           Prod.nItem    := I;
+           Prod.nItem    := I+1;
            Prod.cProd    := Titem(fitens[i]).Codigo;
            Prod.cEAN     := Titem(fitens[i]).cEAN;
            Prod.xProd    := Titem(fitens[i]).Nome;
@@ -469,6 +512,11 @@ begin
            Prod.qCom     := Titem(fitens[i]).Quantidade;
            Prod.vUnCom   := Titem(fitens[i]).Unitario;
            Prod.vProd    := Titem(fitens[i]).Total;
+
+           Prod.uTrib     := Titem(fitens[i]).unidade;
+           Prod.qTrib     := Titem(fitens[i]).Quantidade;
+           Prod.vUnTrib   := Titem(fitens[i]).Unitario;
+
 
            vTotal := vTotal + Titem(fitens[i]).Total;
 
@@ -897,7 +945,7 @@ begin
 //      Total.retTrib.vBCRetPrev := StringToFloatDef( INIRec.ReadString('retTrib','vBCRetPrev','') ,0) ;
 //      Total.retTrib.vRetPrev   := StringToFloatDef( INIRec.ReadString('retTrib','vRetPrev'  ,'') ,0) ;
 //
-//      Transp.modFrete := StrTomodFrete(OK, INIRec.ReadString('Transportador','FretePorConta',INIRec.ReadString('Transportador','modFrete','0')));
+      Transp.modFrete := StrTomodFrete(OK, inttostr(fIdentificacao.modFrete));
 //      Transp.Transporta.CNPJCPF  := INIRec.ReadString('Transportador','CNPJCPF'  ,'');
 //      Transp.Transporta.xNome    := INIRec.ReadString('Transportador','NomeRazao',INIRec.ReadString('Transportador','xNome',''));
 //      Transp.Transporta.IE       := INIRec.ReadString('Transportador','IE'       ,'');
@@ -1047,6 +1095,18 @@ begin
       ShowMessage('Ocorreu um erro ao informar o numero do certificado!' + sLineBreak +
                   e.Message);
     end;
+  end;
+end;
+
+function TfrmGerenciadorNFCe.UFparaCodigo(const UF: string): integer;
+const
+  (**)UFS = '.AC.AL.AP.AM.BA.CE.DF.ES.GO.MA.MT.MS.MG.PA.PB.PR.PE.PI.RJ.RN.RS.RO.RR.SC.SP.SE.TO.';
+  CODIGOS = '.12.27.16.13.29.23.53.32.52.21.51.50.31.15.25.41.26.22.33.24.43.11.14.42.35.28.17.';
+begin
+  try
+    result := StrToInt(copy(CODIGOS, pos('.' + UF + '.', UFS) + 1, 2));
+  except
+    result := 0;
   end;
 end;
 
