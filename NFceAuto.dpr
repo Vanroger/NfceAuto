@@ -28,6 +28,5 @@ begin
     WebRequestHandler.WebModuleClass := WebModuleClass;
   Application.Initialize;
   Application.CreateForm(TfrmPrincipal, frmPrincipal);
-  Application.CreateForm(TfrmGerenciadorNFCe, frmGerenciadorNFCe);
   Application.Run;
 end.

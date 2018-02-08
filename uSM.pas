@@ -4,7 +4,8 @@ interface
 
 uses System.SysUtils, System.Classes, System.Json,
     DataSnap.DSProviderDataModuleAdapter,
-    Datasnap.DSServer, Datasnap.DSAuth, REST.Json;
+    Datasnap.DSServer, Datasnap.DSAuth, REST.Json,
+    untGerenciadorNFCe;
 
 type
   TServerMethods1 = class(TDSServerModule)
@@ -25,7 +26,7 @@ implementation
 
 function TServerMethods1.EnviarNFCe(pDados: TJsonObject): TJsonObject;
 begin
-//  result := TJson.
+  result := frmGerenciadorNFCe.EnviarNFCe(pDados);
 end;
 
 end.

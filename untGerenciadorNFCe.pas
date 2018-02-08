@@ -7,9 +7,19 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, ACBrBase, ACBrDFe, ACBrNFe, uCertificado,
   Data.DB, Datasnap.DBClient, uEmitente, rest.json, System.JSON, uitem,
   system.generics.collections, uDestinatario, pcnconversao, acbrutil,
-  pcnConversaoNFe, uWebServices, uIdentificacao;
+  pcnConversaoNFe, uWebServices, uIdentificacao, MidasLib;
 
 type
+  TRetorno = class
+  private
+    FcStat: Integer;
+    FcMotivo: String;
+    procedure SetcMotivo(const Value: String);
+    procedure SetcStat(const Value: Integer);
+    public
+    property cStat : Integer read FcStat write SetcStat;
+    property cMotivo : String read FcMotivo write SetcMotivo;
+  end;
   TfrmGerenciadorNFCe = class(TForm)
     ACBrNFe1: TACBrNFe;
     cdsCertificado: TClientDataSet;
@@ -49,7 +59,7 @@ type
     function InformarItens(value: TJSONObject): boolean;
     procedure CriaNFCe;
     function CriarNFe: Boolean;
-    function EnviaNFCe : Boolean;
+    function EnviaNFCe : Tjsonobject;
     function SetCertificado: Boolean;
     procedure LeWebServices;
     procedure SetIDentificacao;
@@ -70,13 +80,15 @@ implementation
 
 {$R *.dfm}
 
-function TfrmGerenciadorNFCe.EnviaNFCe: Boolean;
+function TfrmGerenciadorNFCe.EnviaNFCe: Tjsonobject;
 var
   Sincrono : boolean;
   i        : integer;
+  retorno  : TRetorno;
+  vJson : Tjsonobject;
 begin
   try
-    Result := TRUE;
+    retorno := TRetorno.Create;
     ACBrNFe1.Configuracoes.Geral.VersaoDF := ve310;
 //    ACBrNFe1.Configuracoes.Geral.VersaoDF := ve400;
 
@@ -91,7 +103,13 @@ begin
     ACBrNFe1.WebServices.Enviar.Sincrono := Sincrono;
     ACBrNFe1.WebServices.Enviar.Executar;
 
-    showmessage(ACBrNFe1.WebServices.Enviar.Msg);
+    retorno.FcStat := ACBrNFe1.WebServices.Enviar.CStat;
+    retorno.FcMotivo :=  ACBrNFe1.WebServices.Enviar.XMotivo;
+    vJSON := TJson.ObjectToJsonObject(retorno);
+
+    result := vJSON;
+
+    showmessage(result.ToString);
 //    ('[ENVIO]');
 //    ('Versao='+ACBrNFe1.WebServices.Enviar.verAplic);
 //    ('TpAmb='+TpAmbToStr(ACBrNFe1.WebServices.Enviar.TpAmb));
@@ -158,7 +176,6 @@ begin
     ACBrNFe1.NotasFiscais.Clear;
   except
     on e: exception do begin
-      result := false;
    //   (e.message);
       ACBrNFe1.NotasFiscais.Clear;
     end;
@@ -175,7 +192,8 @@ begin
     fIdentificacao.cNF := fCodigoNumerico; // string CODIGO
     fIdentificacao.nNF := fNumeroNf; // integer NUMERO DOCUMENTO FISCAL
     CriarNFe;
-    EnviaNFCe;
+    RESULT := EnviaNFCe;
+
   finally
 
   end;
@@ -1110,5 +1128,17 @@ begin
   end;
 end;
 
+
+{ TRetorno }
+
+procedure TRetorno.SetcMotivo(const Value: String);
+begin
+  FcMotivo := Value;
+end;
+
+procedure TRetorno.SetcStat(const Value: Integer);
+begin
+  FcStat := Value;
+end;
 
 end.

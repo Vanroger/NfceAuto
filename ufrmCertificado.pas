@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Buttons, Vcl.StdCtrls, Data.DB,
-  Datasnap.DBClient, ACBrCAPICOM_TLB;
+  Datasnap.DBClient, ACBrCAPICOM_TLB, MidasLib;
 
 type
   TfrmCertificado = class(TForm)
